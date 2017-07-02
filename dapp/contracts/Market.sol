@@ -1,64 +1,102 @@
 pragma solidity ^0.4.11;
 
-contract Market {
-	address public owner;
-	string public repo_url;
+contract Ownable {
+ 	address public owner = msg.sender;
 
-	modifier onlyOwner() 
-	{ // Modifier
-		require(msg.sender == owner);
-		_;
-	}
+	/// @notice check if the caller is the owner of the contract
+  	modifier onlyOwner {
+  		if (msg.sender != owner) throw;
+  		_;
+  	}
 
-	function Market() public  // constructor
+	/// @notice change the owner of the contract
+	/// @param _newOwner the address of the new owner of the contract.
+	function changeOwner(address _newOwner)
+		onlyOwner
 	{
-		owner = msg.sender;
+		if(_newOwner == 0x0) throw;
+	    owner = _newOwner;
 	}
 
-	function getRepoUrl() constant returns (string) 
-	{
-		return repo_url;
-	}
-
-	function setRepoUrl(string _repo_url) onlyOwner
-	{
-		repo_url = _repo_url;
-	}
-
-	/**********
-     Standard kill() function to recover funds 
-     **********/
-    
+	/**
+	 * Standard kill() function to recover funds 
+	 */
     function kill()
     { 
         if (msg.sender == owner)  // only allow this action if the account sending the signal is the creator
             suicide(owner);       // kills this contract and sends remaining funds back to creator
     }
-
 }
 
-// contract MetaCoin {
-// 	mapping (address => uint) balances;
+contract Market is Ownable {
+	string public repo_url;
 
-// 	event Transfer(address indexed _from, address indexed _to, uint256 _value);
+	struct Reward {
+		address publisher;
+		uint rewardAmount; // Wei
+		uint issueNumber; // number
+		uint createTime;
+		uint expirationTime;
+		address counterParty;
+	}
 
-// 	function MetaCoin() {
-// 		balances[tx.origin] = 10000;
-// 	}
+	// THIS?
+	uint numRewards;
+	mapping (uint => Reward) rewards;
 
-// 	function sendCoin(address receiver, uint amount) returns(bool sufficient) {
-// 		if (balances[msg.sender] < amount) return false;
-// 		balances[msg.sender] -= amount;
-// 		balances[receiver] += amount;
-// 		Transfer(msg.sender, receiver, amount);
-// 		return true;
-// 	}
+	function Market() public  // constructor
+	{
+	}
 
-// 	function getBalanceInEth(address addr) returns(uint){
-// 		return ConvertLib.convert(getBalance(addr),2);
-// 	}
+	function getRepoUrl() 
+		public
+		constant
+		returns (string) 
+	{
+		return repo_url;
+	}
 
-// 	function getBalance(address addr) returns(uint) {
-// 		return balances[addr];
-// 	}
-// }
+	function setRepoUrl(string _repo_url)
+		onlyOwner
+	{
+		repo_url = _repo_url;
+	}
+
+	function postReward(uint _issueNumber, uint _expirationTime)
+		public
+		payable
+	{
+		numRewards = numRewards + 1;
+		rewards[numRewards].publisher = msg.sender;
+		rewards[numRewards].rewardAmount = msg.value;
+		rewards[numRewards].issueNumber = _issueNumber;
+		rewards[numRewards].createTime = now;
+		rewards[numRewards].expirationTime = _expirationTime;
+		// throw an event that tells the client which record
+	}
+
+	function getReward(uint rewardId)
+		public
+		constant
+		returns (
+			uint issueNumber,
+			uint rewardAmount,
+			uint createTime,
+			uint expirationTime
+		)
+	{
+		return (
+			rewards[rewardId].issueNumber,
+			rewards[rewardId].rewardAmount,
+			rewards[rewardId].createTime,
+			rewards[rewardId].expirationTime
+		);
+	}
+
+	function getNumRewards() public constant returns (uint)
+	{
+		return numRewards;
+	}
+
+
+}
