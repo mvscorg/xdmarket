@@ -82,7 +82,7 @@ contract('Market', function(accounts) {
       })
     });
 
-
+    
 
     // @todo resolving it one way or the other should affect those user balances.
 

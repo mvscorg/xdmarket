@@ -1,32 +1,6 @@
 pragma solidity ^0.4.11;
 
-contract Ownable {
- 	address public owner = msg.sender;
-
-	/// @notice check if the caller is the owner of the contract
-  	modifier onlyOwner {
-  		if (msg.sender != owner) throw;
-  		_;
-  	}
-
-	/// @notice change the owner of the contract
-	/// @param _newOwner the address of the new owner of the contract.
-	function changeOwner(address _newOwner)
-		onlyOwner
-	{
-		if(_newOwner == 0x0) throw;
-	    owner = _newOwner;
-	}
-
-	/**
-	 * Standard kill() function to recover funds 
-	 */
-    function kill()
-    { 
-        if (msg.sender == owner)  // only allow this action if the account sending the signal is the creator
-            suicide(owner);       // kills this contract and sends remaining funds back to creator
-    }
-}
+import "./zeppelin/Ownable.sol";
 
 contract Market is Ownable {
 	string public repo_url;
