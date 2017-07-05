@@ -1,64 +1,81 @@
 pragma solidity ^0.4.11;
 
-contract Market {
-	address public owner;
+import "./zeppelin/Ownable.sol";
+
+contract Market is Ownable {
 	string public repo_url;
 
-	modifier onlyOwner() 
-	{ // Modifier
-		require(msg.sender == owner);
-		_;
+	struct Reward {
+		address publisher;
+		uint rewardAmount; // Wei
+		uint issueNumber; // number
+		uint createTime;
+		uint expirationTime;
+		address counterParty;
 	}
+
+	// THIS?
+	uint numRewards;
+	mapping (uint => Reward) rewards;
 
 	function Market() public  // constructor
 	{
-		owner = msg.sender;
 	}
 
-	function getRepoUrl() constant returns (string) 
+	function getRepoUrl() 
+		public
+		constant
+		returns (string) 
 	{
 		return repo_url;
 	}
 
-	function setRepoUrl(string _repo_url) onlyOwner
+	function setRepoUrl(string _repo_url)
+		onlyOwner
 	{
 		repo_url = _repo_url;
 	}
 
-	/**********
-     Standard kill() function to recover funds 
-     **********/
-    
-    function kill()
-    { 
-        if (msg.sender == owner)  // only allow this action if the account sending the signal is the creator
-            suicide(owner);       // kills this contract and sends remaining funds back to creator
-    }
+	function postReward(uint _issueNumber, uint _expirationTime)
+		public
+		payable
+	{
+		numRewards = numRewards + 1;
+		rewards[numRewards].publisher = msg.sender;
+		rewards[numRewards].rewardAmount = msg.value;
+		rewards[numRewards].issueNumber = _issueNumber;
+		rewards[numRewards].createTime = now;
+		rewards[numRewards].expirationTime = _expirationTime;
+		// throw an event that tells the client which record
+	}
+
+	function getReward(uint rewardId)
+		public
+		constant
+		returns (
+			uint issueNumber,
+			uint rewardAmount,
+			uint createTime,
+			uint expirationTime
+		)
+	{
+		return (
+			rewards[rewardId].issueNumber,
+			rewards[rewardId].rewardAmount,
+			rewards[rewardId].createTime,
+			rewards[rewardId].expirationTime
+		);
+	}
+
+	function getNumRewards() public constant returns (uint)
+	{
+		return numRewards;
+	}
+
+	function getBalance() public constant returns (uint)
+	{
+		return this.balance;
+	}
+
 
 }
-
-// contract MetaCoin {
-// 	mapping (address => uint) balances;
-
-// 	event Transfer(address indexed _from, address indexed _to, uint256 _value);
-
-// 	function MetaCoin() {
-// 		balances[tx.origin] = 10000;
-// 	}
-
-// 	function sendCoin(address receiver, uint amount) returns(bool sufficient) {
-// 		if (balances[msg.sender] < amount) return false;
-// 		balances[msg.sender] -= amount;
-// 		balances[receiver] += amount;
-// 		Transfer(msg.sender, receiver, amount);
-// 		return true;
-// 	}
-
-// 	function getBalanceInEth(address addr) returns(uint){
-// 		return ConvertLib.convert(getBalance(addr),2);
-// 	}
-
-// 	function getBalance(address addr) returns(uint) {
-// 		return balances[addr];
-// 	}
-// }
