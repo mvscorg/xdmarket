@@ -16,6 +16,9 @@ contract('Market', function(accounts) {
   var expiration_time = moment().add(30, 'days').unix();
   var amount = web3.toWei(1,'ether');
 
+  var counterParty = accounts[4];
+
+
 
   describe("setting the repo url",function(){
 
@@ -45,6 +48,10 @@ contract('Market', function(accounts) {
 
   describe("the rewards", function() {
 
+    var publisher_balance_pre_reward;
+    var publisher_gas_used;
+
+
     it('count should be zero initially', function(done){
       instance.getNumRewards.call().then(function(n_rewards){
         assert.equal(0,n_rewards,'there should be zero rewards');
@@ -54,10 +61,20 @@ contract('Market', function(accounts) {
 
     it('count should increment after creation', function(done){
 
+      publisher_balance_pre_reward = web3.eth.getBalance(publisher);
+
       // Question: what are the units of value in these tests?
       instance.postReward(issue_number, expiration_time,{"from":publisher,"value":amount}).then(function(result){
         // console.log('TX result', result);
         // result.tx, result.logs, result.gasUsed,
+        publisher_gas_used = result.receipt.gasUsed;
+        // gas price!
+        // eth: 14290500 000 000 000
+        // gas: 142905
+
+        // 1 ether 1e18 wei ( or a billion billion )
+        // 1gas = .5TWei or .000 000 05 Eth  .1 microether
+        // 1 microether = .1 gas 100 nanoether / GWei = 1 gas
 
         instance.getNumRewards.call().then(function(n_rewards){
           assert.equal(1,n_rewards,'there should be one reward');
@@ -72,59 +89,49 @@ contract('Market', function(accounts) {
             reward_amount = parseInt(result[1]),
             create_time = parseInt(result[2]),
             _expiration_time = parseInt(result[3]);
-        // well this works, but the format of the amount is wrid.
+        // well this works, but the format of the amount is weird.
         assert.equal(web3.toWei(1,'ether'), reward_amount, 'reward amount should match');
         assert.equal(issue_number, _issue_number, 'the issue number should match');
         assert(Math.abs(create_time - moment().unix()) < 15,'the create time should fall within 15 seconds');
-        assert(Math.abs(expiration_time - _expiration_time) < 15, 'the expiration time falls within 15 seconds');
+        assert.equal(expiration_time, _expiration_time, 'the expiration times should be equal');
         // console.log(JSON.stringify([issue_number, reward_amount, create_time, expiration_time]));
         done();
       })
     });
 
-    
+    it('should have a consistent gas price reflected in the publisher balance', function(done){
+      // @see : https://github.com/MikeMcl/bignumber.js/
+      var publisher_balance_after = web3.eth.getBalance(publisher);
+      var cost = publisher_balance_pre_reward.minus(publisher_balance_after).minus(web3.toWei(1,'ether'));
+      var gas_price = cost.dividedBy(publisher_gas_used);
+      assert.equal(gas_price.dividedBy(1e9).toString(), '100', 'Gas price in gWei should be 100');
+      done();
+    })
 
-    // @todo resolving it one way or the other should affect those user balances.
+    it('should affect the balance of the contract', function(done){
 
-//    it("can be created by anyone and updates the list of rewards", function(done){
-//
-//      // unix seconds
-//      console.log(moment().unix());
-//
-//      instance.postReward(issueNumber, moment().add(30, 'days').unix(),{"from":publisher}).then(function(tx){
-//        // we created the transaction.
-//        console.log('Transaction ' + tx + ' done.');
-//        console.log('Moment time: ' + moment().unix());
-//
-//
-//      })
-//
-//
-//
-//    }); // it can be created by any user
+      instance.getBalance.call().then(function(balance){
+        assert.equal(balance, web3.toWei(1,'ether'));
+        done();
+      })
 
+    })
 
-  });
+  });  // end describe the rewards
 
 
-  // it("should not allow anyone else to change the repo url", function(done) {
-  //   var instance;
-  //   Market.new({"from":owner})
-  //   .then(function(_instance){
-  //     instance = _instance;
-  //     return instance.setRepoUrl('mvscorg/xdmarket',{"from":accounts[0]});
-  //   }).then(function(tx){
-  //     assert.notEmpty(tx);
-  //     assert(false,'the transaction should have failed');
-  //     done();
-  //   }).catch(function(e){
-  //     done();
-  //   });
-  // }); // it
+  describe('the counterParty', function(){
+
+    it('must send the correct total to the counter function.')
+
+
+  }); // end describe the counterParty
 
 
 
-});
+}); // end contract('Market',function(){
+
+
 
 //   it("should call a function that depends on a linked library", function() {
 //     var meta;

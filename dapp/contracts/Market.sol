@@ -72,5 +72,10 @@ contract Market is Ownable {
 		return numRewards;
 	}
 
+	function getBalance() public constant returns (uint)
+	{
+		return this.balance;
+	}
+
 
 }
