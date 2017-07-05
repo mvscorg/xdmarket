@@ -77,5 +77,19 @@ contract Market is Ownable {
 		return this.balance;
 	}
 
+	function counterReward(uint rewardId) public payable
+	{
+		if (rewards[rewardId].publisher == 0) {
+			throw; // not a valid reward
+		}
+		if (rewards[rewardId].counterParty != 0) {
+			throw; // reward already has a counter party
+		}
+		if (rewards[rewardId].rewardAmount != msg.value) {
+			throw; // transaction amount does not match reward amount
+		}
+		rewards[rewardId].counterParty = msg.sender;
+	}
+
 
 }
