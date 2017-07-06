@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-import "./zeppelin/Ownable.sol";
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract Market is Ownable {
 	string public repo_url;
