@@ -94,6 +94,7 @@ contract('Market', function(accounts) {
         // well this works, but the format of the amount is weird.
         assert.equal(reward_amount, _reward_amount, 'reward amount should match');
         assert.equal(issue_number, _issue_number, 'the issue number should match');
+        console.log('create time:' + create_time + ' moment.unix:' + moment().unix());
         assert(Math.abs(create_time - moment().unix()) < 15,'the create time should fall within 15 seconds');
         assert.equal(expiration_time, _expiration_time, 'the expiration times should be equal');
         // console.log(JSON.stringify([issue_number, reward_amount, create_time, expiration_time]));

@@ -2,21 +2,34 @@ pragma solidity ^0.4.11;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
+
+
 contract Market is Ownable {
+
+    // Public Data //
 	string public repo_url;
+
+	// Contract Data //
+
+    // Tracks status of reward contracts -  will not compile if you terminate the next line in semicolon
+	enum rewardState { incomplete, posted, countered, won_publisher, won_counterparty, expired }
 
 	struct Reward {
 		address publisher;
+		address counterParty;
 		uint rewardAmount; // Wei
 		uint issueNumber; // number
 		uint createTime;
 		uint expirationTime;
-		address counterParty;
+		rewardState state;
 	}
 
-	// THIS?
 	uint numRewards;
+
+	// Hash of all reward contracts
 	mapping (uint => Reward) rewards;
+
+
 
 	function Market() public  // constructor
 	{
@@ -89,6 +102,32 @@ contract Market is Ownable {
 			throw; // transaction amount does not match reward amount
 		}
 		rewards[rewardId].counterParty = msg.sender;
+	}
+
+	function finalizeReward(uint rewardId, rewardState _rewardState) public
+	{
+		rewards[rewardId].state = _rewardState;
+
+		// Won_publisher
+		if (rewards[rewardId].state == rewardState.won_publisher)
+		{
+		    payoutNetZero(rewardId, rewards[rewardId].publisher);
+		}
+
+	    // Won_counterparty
+		if (rewards[rewardId].state == rewardState.won_publisher)
+		{
+			payoutNetZero(rewardId, rewards[rewardId].counterParty);
+		}
+
+		// Expired
+		// Incomplete, posted, countered
+	}
+
+	function payoutNetZero(uint rewardId, address payee)
+	{
+		// transfer from this contract to payee
+		payee.transfer(rewards[rewardId].rewardAmount);
 	}
 
 
