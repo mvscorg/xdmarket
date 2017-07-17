@@ -1,14 +1,14 @@
 # xdmarket
 Extensible Decentralized market platform 
 
+Welcome!
 
-# Solidity Questions
+In this repo we're building a Dapp that will help connect peer-production to markets.
 
-1. Does inheriting contract methods exact a performance penalty?
-    # i don't think so - http://solidity.readthedocs.io/en/develop/contracts.html#inheritance
-2. Is it better to handle a set of items as an array, or a mapping coupled with a counter variable?
-    #  https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a
-    # 
-3. How to handle events?  Can they be used to store historical data instead of transactions?
-    # http://solidity.readthedocs.io/en/develop/contracts.html#events
-    # event data is NOT available inside contracts.
+See the wiki for more info: https://github.com/mvscorg/xdmarket/wiki
+
+Or join us on slack: https://mvscteam.slack.com/messages
+
+Or on send us email: https://groups.google.com/forum/#!forum/moz_xdmarket
+
+Or just grab an issue and have at it.  This is all under MPL and we're just getting started.
