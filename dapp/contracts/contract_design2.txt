@@ -1,0 +1,52 @@
+
+Contract design - for second, less trivial, iteration of market
+
+Works for work/info futures market and partial/whole work, etc.
+
+Hopefully easy to understand as well.
+
+State A: No work done, yet.  Alice wants work done (or information provided)
+
+Offer: Will_Fund ("I will fund 100 shares if FIXED/FOUND, but I require the counterparty to fund 10 shares.")
+    user      	            	: Alice
+    shares			: 100
+    percent_required_to_fund	: 90
+    satoshi_per_share		: 2
+    
+Offer: Will_Fix ("I will fund 10 shares, and receive 100 shares if FIXED/FOUND")
+    user     	      	      	: Bob
+    shares			: 100
+    percent_required_to_fund	: 10
+    satoshi_per_share		: 2
+
+The total contract value is: 100% * 100 shares * 2 = 200 satoshi (We can say 100% of 100 shares at price 2 = 200)
+Alice and Bob are parties
+Alice put 100 * 90% * 2 = 180 satoshi in escrow. (90% of 100 @ 2 = 180) - that's Alices position.
+Bob put 100 * 10% * 2 = 20 satoshi in escrow. (10% of 100 @ 2 = 20) - that's Bobs position
+Contract 1 is created.
+If Bob completes all work, he stands to make 180 satoshi.  Half the work is worth 90 satoshi.
+ 
+State B: Half the work has been done. (Or likelihood of FOUND has gone up)
+
+Offer: Sell_Shares ("I have done 90 satoshis worth of work, and put 20 satoshi in escrow.  I want 110 for my position.")
+    user	    	   	: Bob
+    shares			: 100
+    percent_required_to_fund	: 10
+    satoshi_per_share		: 11
+    Contract 1 - counterparty is Alice
+
+Offer: Take_Over_Work ("Sure, I'll pay 110 for that contract.  If it's FIXED/FOUND I'll get 200.  I'll make 90 for my work.")
+    user			: Cathy
+    shares			: 100
+    percent_required_to_fund	: 10
+    satoshi_per_share		: 11
+
+State C: All work has been done.  
+
+Contract matured as FIXED/FOUND.  Cathy is paid 200.
+
+
+
+
+      
+      
